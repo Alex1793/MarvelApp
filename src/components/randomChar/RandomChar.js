@@ -9,10 +9,6 @@ import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
 
 class RandomChar extends Component {
-    constructor (props) {
-        super (props);
-        this.updateChar();
-    }
 
     state = {
         char: {},
@@ -22,6 +18,10 @@ class RandomChar extends Component {
 
     
     marvelService = new MarvelService();
+    
+    componentDidMount() {
+        this.updateChar();
+    }
 
     onCharLoaded = (char) => {
         this.setState({
@@ -45,11 +45,13 @@ class RandomChar extends Component {
             .then(this.onCharLoaded)
             .catch(this.onError)
         
-        this.setState({loading: true})
+        this.setState({
+            loading: true,
+            error: false
+        })
     }
 
     render () {
-
         const {char , loading, error} = this.state;
 
         const errorMessage = error ? <ErrorMessage/> : null;
@@ -91,9 +93,11 @@ const View = ({char}) => {
 
     const shortDescr = fixDescr.length > 210 ? fixDescr.slice(0, 210) + '...' : fixDescr
 
+    const imgCorrect = thumbnale === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg' ? {objectFit: 'contain'} : {objectFit: 'cover'}
+
     return (
         <div className="randomchar__block">
-            <img src={thumbnale} alt="Random character" className="randomchar__img"/>
+            <img src={thumbnale} alt="Random character" className="randomchar__img" style={imgCorrect}/>
             <div className="randomchar__info">
                 <p className="randomchar__name">{name}</p>
                 <p className="randomchar__descr">
