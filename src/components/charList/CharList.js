@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import MarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
@@ -9,11 +10,14 @@ class CharList extends Component {
 
     state = {
         chars: [],
-        loading: true
+        loading: true,
+        newItemLoading: false,
+        offset: 210,
+        charEnded: false
     }
 
     componentDidMount() {
-        this.updateListChars();
+        this.onRequest();
     }
 
     marvelService = new MarvelService();
@@ -28,10 +32,37 @@ class CharList extends Component {
             });
     }
 
+    onRequest = (offset) => {
+        this.onCharListLoading();
 
-    render () {
+        this.marvelService
+            .getAllCharecters(offset)
+            .then(res => {
+                let ended;
+                if(res.length < 9) {
+                    ended = true;
+                }
+
+                this.setState(({chars, offset}) => ({
+                    chars: [...chars, ...res],
+                    loading: false,
+                    newItemLoading: false,
+                    offset: offset + 9,
+                    charEnded: ended
+                }))
+            });
+    }
+
+    onCharListLoading = () => {
+        this.setState({
+            newItemLoading: true
+        })
+    }
+
+
+    render () { 
         
-        const {chars ,loading} = this.state;
+        const {chars ,loading, newItemLoading, offset, charEnded} = this.state;
 
         const elems = chars.map(item => {
 
@@ -57,7 +88,11 @@ class CharList extends Component {
                 <ul className="char__grid">
                     {elems}
                 </ul>
-                <button className="button button__main button__long">
+                <button 
+                    className="button button__main button__long"
+                    disabled={newItemLoading}
+                    style={{display: charEnded ? 'none' : 'block'}}
+                    onClick={() => this.onRequest(offset)}>
                     <div className="inner">load more</div>
                 </button>
             </div>
@@ -65,5 +100,8 @@ class CharList extends Component {
     }
 }
 
+CharList.propTypes = {
+    onCharSelected: PropTypes.func.isRequired
+}
 
 export default CharList;
