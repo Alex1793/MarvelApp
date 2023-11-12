@@ -59,12 +59,23 @@ class CharList extends Component {
         })
     }
 
+    itemRefs = [];
+
+    setRef = (ref) => {
+        this.itemRefs.push(ref);
+    }
+
+    focusOnItem = (id) => {
+        this.itemRefs.forEach(item => item.classList.remove('char__item_selected'));
+        this.itemRefs[id].classList.add('char__item_selected');
+        this.itemRefs[id].focus();
+    }
+
 
     render () { 
-        
         const {chars ,loading, newItemLoading, offset, charEnded} = this.state;
 
-        const elems = chars.map(item => {
+        const elems = chars.map((item, i) => {
 
             let styles;
             if(item.thumbnale === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
@@ -72,8 +83,20 @@ class CharList extends Component {
             }
 
             return (
-                <li className="char__item" key={item.id}
-                    onClick={() => this.props.onCharSelected(item.id)}>
+                <li className="char__item" 
+                    key={item.id} 
+                    tabIndex={0}
+                    onClick={() => {
+                        this.props.onCharSelected(item.id);
+                        this.focusOnItem(i)
+                    }}
+                    onKeyPress={(e) => {
+                        if (e.key === ' ' || e.key === "Enter") {
+                            this.props.onCharSelected(item.id);
+                            this.focusOnItem(i);
+                        }
+                    }}      
+                    ref={this.setRef}>
                     <img src={item.thumbnale} alt="abyss" style={styles}/>
                     <div className="char__name">{item.name}</div>
                 </li>
